@@ -1,4 +1,4 @@
-# H1 Stocker: ***ML-Powered Stock Market Prediction***
+# Stocker: ***ML-Powered Stock Market Prediction***
 
 Built in python 3.6.9
 
