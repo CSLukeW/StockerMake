@@ -1,41 +1,20 @@
+""" training script """
+
 import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
+import argparse
 
-""" Training functions inc."""
+import data_helpers as dh
 
-def daily(symbol, key, compact=True):
-    """ Returns data frame of queried data
+parser = argparse.ArgumentParser(description="Model Training Script")
+parser.add_argument('key', nargs='1', help='User API Key', default='8X10BAT7HUYHPS8Y')
+parser.add_argument('outdir', nargs='1', default='/models/1/', help="Directory for stored model (if more than one symbol, symbol will be added at end of path for each model")
+parser.add_argument('symbols', nargs=argparse.REMAINDER, help="List of symbols to train (All at end of command)")
 
-        symbol -- symbol of desired stock
-        key -- user's API key
-        compact -- True -> last 100 results
-                   False -> all past results
-    """
+symbols = ['AAPL', 'TSLA', 'MSFT']
+data = []
 
-    ts = TimeSeries(key=key, output_format='pandas')
-    if compact:
-        data, _ = ts.get_daily(symbol=symbol, outputsize='compact')
-    else:
-        data, _ = ts.get_daily(symbol=symbol, outputsize='full')
-
-    return data
-
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    key = '8X10BAT7HUYHPS8Y'
-    symbols = ['AAPL', 'TSLA', 'MSFT']
-    data = []
-
-    for symbol in symbols:
-        hist = daily(symbol, key, compact=False)
-        data.append(hist)
-        print(hist)
-        print()
+for symbol in symbols:
+    hist = dh.daily(symbol, key, compact=False)
+    data.append(hist)
+    print(hist)
+    print()
