@@ -4,10 +4,27 @@ import pandas as pd
 import numpy as np
 import argparse
 import tensorflow as tf
+from matplotlib import pyplot
 
 import data_helpers as dh
 
+class Stocker:
+    def __init__(self, shape, loss='mse', optimizer='adam'):
+        """ Creating Stocker instance immediately creates model 
+
+            Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
+            loss function and ADAM optimizer function.
+        """
+        self.model = tf.keras.Sequential()
+        self.model.add(tf.keras.layers.LSTM(100, input_shape=(shape)))
+        self.model.add(tf.keras.layers.Dense(5))
+        self.model.compile(loss=loss, optimizer=optimizer)
+        print(self.model.summary())
+
+
 if __name__ == '__main__':
+
+    """ Test/Demo of Stocker module """
 
     parser = argparse.ArgumentParser(description="Model Training Script")
     parser.add_argument('key', help='User API Key')
@@ -40,7 +57,11 @@ if __name__ == '__main__':
         # convert numpy arrays to PyTorch tensors
         training_tensor = tf.convert_to_tensor(training, np.float32)
         test_tensor = tf.convert_to_tensor(test, np.float32)
+
+        #print(training_tensor.shape)
         
         """ -------------------------------- """
-        print(training_tensor)
-        print(test_tensor)
+        #print(training_tensor)
+        #print(test_tensor)
+
+        model = Stocker(training_tensor.shape)
