@@ -33,10 +33,11 @@ class Stocker:
                             batch_size=100, steps_per_epoch = 50, \
                             validation_data=self.test_data, validation_steps = 50)
 
+        pyplot.figure()
         pyplot.plot(self.fit.history['loss'], label='train')
         pyplot.plot(self.fit.history['val_loss'], label='test')
         pyplot.legend()
-        pyplot.show()
+        pyplot.savefig('trained.png')
 
 
 if __name__ == '__main__':
@@ -61,6 +62,7 @@ if __name__ == '__main__':
         print(hist)
         #print()
 
+        pyplot.figure()
         hist.plot(subplots=True)
         pyplot.savefig('input.png')
 
