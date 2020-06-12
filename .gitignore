@@ -133,3 +133,6 @@ dmypy.json
 
 # My key
 key.txt
+
+# Plots
+*.png
