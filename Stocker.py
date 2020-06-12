@@ -1,5 +1,8 @@
 """ training script """
 
+import matplotlib
+matplotlib.use('Agg')
+
 import pandas as pd
 import numpy as np
 import argparse
@@ -9,7 +12,7 @@ from matplotlib import pyplot
 import data_helpers as dh
 
 class Stocker:
-    def __init__(self, training, test, loss='mse', optimizer='adam'):
+    def __init__(self, training, training_shape, test, loss='mse', optimizer=tf.keras.optimizers.Adam()):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -20,14 +23,12 @@ class Stocker:
 
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
-                                            input_shape=(training.shape[1], training.shape[2])))
+                                            input_shape=training_shape[-2:]))
         self.model.add(tf.keras.layers.Dense(5))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
 
-    """ Training WIP
-
-    def train(self):
+    def train(self, in_train, out_train):
         self.fit = self.model.fit(self.training_data, epochs=50, \
                             batch_size=100, \
                             validation_data=self.test_data, verbose=2, shuffle=False)
@@ -36,8 +37,6 @@ class Stocker:
         pyplot.plot(self.fit['val_loss'], label='test')
         pyplot.legend()
         pyplot.show()
-        
-    """
 
 
 if __name__ == '__main__':
@@ -57,32 +56,45 @@ if __name__ == '__main__':
         # read historical daily data from alpha_vantage
         # store in python dict
         hist = dh.daily(symbol, parse.key, compact=False)
+        hist.head()
         data[symbol] = hist
         print(hist)
         #print()
 
-        """ Data Preprocessing """ 
+        hist.plot(subplots=True)
+        pyplot.savefig('input.png')
 
-        # turn dataframe to numpy array
-        tmp = hist.to_numpy()
+        """ Data Preprocessing """
+        
+        split = round(len(hist.index)*7/10)
 
-        # split into training and testing sets 90-10
-        split = round(tmp.shape[0]*1/10)
-        test, training = tmp[:split], tmp[split:]
+        # standardize data
+        data = hist.values
+        mean = data[:split].mean(axis=0)
+        std = data[:split].mean(axis=0)
 
-        test = dh.array_to_supervised(test, 3)
-        test = test.reshape((test.shape[0], 1, test.shape[1]))
+        data = (data-mean)/std
 
-        training = dh.array_to_supervised(training, 3)
-        training = training.reshape((training.shape[0], 1, training.shape[1]))
+        # split into training and test datasets
+        past = 7
+        future = 1
+        step = 1
+        buffer = 100
+        batch = 100
 
-        # convert numpy arrays to tensors and reshape for LSTM
-        training_tensor = tf.convert_to_tensor(training, np.float32)
-        test_tensor = tf.convert_to_tensor(test, np.float32)
+        train_in, train_out = dh.single_step_data(data, data[:, 1], 0, split, past, future, step)
+        val_in, val_out = dh.single_step_data(data, data[:, 1], split, None, past, future, step)
+        train_shape = train_in.shape
+        print(train_shape)
+
+        # convert to tf Datasets
+        train_data_set = tf.data.Dataset.from_tensor_slices((train_in, train_out))
+        train_data_set = train_data_set.cache().shuffle(buffer).batch(batch).repeat()
+
+        val_data_set = tf.data.Dataset.from_tensor_slices((val_in, val_out))
+        val_data_set = val_data_set.batch(batch).repeat()
         
         """ -------------------------------- """
-        #print(training_tensor)
-        #print(test_tensor)
 
-        model = Stocker(training_tensor, test_tensor)
-        model.train()
+        model = Stocker(train_data_set, train_shape, val_data_set)
+        #model.train()
