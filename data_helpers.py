@@ -19,31 +19,23 @@ def daily(symbol, key, compact=True):
 
     return data
 
-def array_to_supervised(array, input_index):
-    """ 
-        Converts given numpy array to supervised learning input.
+def single_step_data(data, target, start, end, history_size, target_size, step):
 
-        Shifts given to t-1 and moves it to end of the array. 
-        End column represents the recursive input value.
+    """
+    Converts dataframe to numpy arrays with correct LSTM input format.
     """
 
-    temp = []
+    dataset=[]
+    labels=[]
 
-    for row in array:
-        temp.append(row[input_index])
+    start = start + history_size
+    if end is None:
+        end = len(data) - target_size
+    
+    for i in range(start, end):
+        indices = range(i-history_size, i, step)
+        dataset.append(data[indices])
 
-    array = np.delete(array, input_index, axis=1)
+        labels.append(target[i+target_size])
 
-    temp = np.roll(temp, 1)
-    temp[-1] = temp[-2]
-    temp = np.asarray([temp])
-
-    con = np.concatenate((array, temp.T), axis=1)
-
-    return con
-
-if __name__ == '__main__':
-    array = [[1.0,2.0,3.0],\
-            [4.0, 5.0, 6.0]]
-
-    print(array_to_supervised(array, 0))
+    return np.array(dataset), np.array(labels)
