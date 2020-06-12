@@ -28,13 +28,13 @@ class Stocker:
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
 
-    def train(self, in_train, out_train):
+    def train(self):
         self.fit = self.model.fit(self.training_data, epochs=50, \
-                            batch_size=100, \
-                            validation_data=self.test_data, verbose=2, shuffle=False)
+                            batch_size=100, steps_per_epoch = 50, \
+                            validation_data=self.test_data, validation_steps = 50)
 
-        pyplot.plot(self.fit['loss'], label='train')
-        pyplot.plot(self.fit['val_loss'], label='test')
+        pyplot.plot(self.fit.history['loss'], label='train')
+        pyplot.plot(self.fit.history['val_loss'], label='test')
         pyplot.legend()
         pyplot.show()
 
@@ -97,4 +97,4 @@ if __name__ == '__main__':
         """ -------------------------------- """
 
         model = Stocker(train_data_set, train_shape, val_data_set)
-        #model.train()
+        model.train()
