@@ -21,7 +21,7 @@ class Stocker:
             loss function and ADAM optimizer function.
         """
 
-        past = 60
+        past = 30
         future = 1
         step = 1
         buffer = 365
@@ -60,7 +60,7 @@ class Stocker:
         """
         self.history = self.model.fit(self.training_data, epochs=EPOCHS, \
                             steps_per_epoch=10, \
-                            validation_data=self.test_data)
+                            validation_data=self.test_data, validation_steps=1)
 
         # plot losses
         pyplot.figure()
@@ -130,6 +130,11 @@ if __name__ == '__main__':
 
         # standardize data
         standard = dh.standardize(hist, split)
+
+        pyplot.figure()
+        standard.plot(subplots=True)
+        pyplot.suptitle('Standardized Features')
+        pyplot.savefig('./plots/standardized.png')
         
         """ -------------------------------- """
 
@@ -142,9 +147,12 @@ if __name__ == '__main__':
 
         predictions = pd.DataFrame(np.asarray(predictions), columns=hist.columns)
 
-        print(standard)
         pyplot.figure()
         standard[:split][:-1].plot(subplots=True)
+        pyplot.legend()
+        pyplot.suptitle('True Values')
+        pyplot.savefig('./plots/truevals.png')
+
         predictions[:][:-1].plot(subplots=True)
         pyplot.legend()
         pyplot.suptitle('Predictions')
