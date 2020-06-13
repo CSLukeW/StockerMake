@@ -36,6 +36,8 @@ class Stocker:
         pyplot.figure()
         pyplot.plot(self.fit.history['loss'], label='train')
         pyplot.plot(self.fit.history['val_loss'], label='test')
+        pyplot.xlabel('Epoch')
+        pyplot.ylabel('Error')
         pyplot.legend()
         pyplot.savefig('trained.png')
 
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
         # split into training and test datasets
         past = 7
-        future = 1
+        future = 7
         step = 1
         buffer = 100
         batch = 100
