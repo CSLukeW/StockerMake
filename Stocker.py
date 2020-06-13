@@ -32,14 +32,14 @@ class Stocker:
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
 
-    def train(self):
+    def train(self, EPOCHS=10):
         """ Trains model in data given during Stocker's init.
 
             All numbers are WIP
         """
-        self.history = self.model.fit(self.training_data, epochs=20, \
-                            steps_per_epoch=int(self.train_shape[0]/60), \
-                            validation_data=self.test_data, validation_steps = 50)
+        self.history = self.model.fit(self.training_data, epochs=EPOCHS, \
+                            steps_per_epoch=int(self.train_shape[0]/EPOCHS), \
+                            validation_data=self.test_data, validation_steps=int(self.test_shape[0]/EPOCHS))
 
         pyplot.figure()
         pyplot.plot(self.history.history['loss'], label='train')
@@ -48,15 +48,22 @@ class Stocker:
         pyplot.ylabel('Error')
         pyplot.legend()
         pyplot.suptitle('Error')
-        pyplot.savefig('error.png')
+        pyplot.savefig('./plots/error.png')
 
     def evaluate(self):
+        """ Evalate model and output loss """
         print(self.test_data, self.test_shape)
         self.loss= self.model.evaluate(self.test_data, steps=int(self.test_shape[0]/60))
         print('Test LOSS: ', self.loss)
 
     def save_model(self, dir='./models/'):
+        """ Save model to given folder. models folder is default """
+
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+
         dir += self.symbol+'.h5'
+
         self.model.save(dir)
 
 
@@ -86,7 +93,7 @@ if __name__ == '__main__':
         pyplot.figure()
         hist.plot(subplots=True)
         pyplot.suptitle('Input Features')
-        pyplot.savefig('input.png')
+        pyplot.savefig('./plots/input.png')
 
         """ Data Preprocessing """
         
@@ -101,6 +108,6 @@ if __name__ == '__main__':
         """ -------------------------------- """
 
         model = Stocker(symbol, train_data_set, train_shape, test_shape, val_data_set)
-        model.train()
+        model.train(20)
         model.evaluate()
         model.save_model()
