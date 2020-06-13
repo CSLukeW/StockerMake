@@ -136,3 +136,6 @@ key.txt
 
 # Plots
 *.png
+
+# models
+/models/*.h5
