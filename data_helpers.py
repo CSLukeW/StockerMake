@@ -28,20 +28,6 @@ def standardize(data, split):
 
     return (values-mean)/std
 
-def to_dataset(data, split):
-    """Returns 2-tuple of training dataset and validation dataset for input into LSTM"""
-    past = 60
-    future = 1
-    step = 1
-    buffer = 60
-    batch = 60
-
-    train_in, train_out = single_step_data(data, data[:, 1], 0, split, past, future, step)
-    val_in, val_out = single_step_data(data, data[:, 1], split, None, past, future, step)
-
-    return tf.data.Dataset.from_tensor_slices((train_in, train_out)).cache().shuffle(buffer).batch(batch).repeat(), \
-            tf.data.Dataset.from_tensor_slices((val_in, val_out)).batch(batch).repeat(), train_in.shape, val_in.shape
-
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
     """
