@@ -13,21 +13,42 @@ import os
 import data_helpers as dh
 
 class Stocker:
-    def __init__(self, symbol, training, training_shape, test_shape, test, loss='mse', optimizer=tf.keras.optimizers.Adam()):
+    def __init__(self, symbol, data, split, feature_labels, row_labels, \
+                    loss='mse', optimizer=tf.keras.optimizers.Adam()):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
             loss function and ADAM optimizer function.
         """
-        self.symbol = symbol
-        self.training_data = training
-        self.test_data = test
-        self.train_shape = training_shape
-        self.test_shape = test_shape
 
+        past = 60
+        future = 1
+        step = 1
+        buffer = 365
+        batch = 365
+
+        data_numpy = data.to_numpy()
+
+        # store data in numpy format
+        self.train_in, self.train_out = dh.single_step_data(data_numpy, data_numpy[:, 1], 0, split, past, future, step)
+        self.val_in, self.val_out = dh.single_step_data(data_numpy, data_numpy[:, 1], split, None, past, future, step)
+
+        # store tf.Dataset format
+        self.training_data = tf.data.Dataset.from_tensor_slices((self.train_in, self.train_out)).cache().shuffle(buffer).batch(batch).repeat()
+        self.test_data = tf.data.Dataset.from_tensor_slices((self.val_in, self.val_out)).batch(batch).repeat()
+
+        # store data attributes
+        self.symbol = symbol
+        self.train_shape = self.train_in.shape
+        self.test_shape = self.val_in.shape
+        self.features = feature_labels
+        self.samples = row_labels
+        self.batch = batch
+
+        # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
-                                            input_shape=training_shape[-2:]))
+        self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
+                                            input_shape=self.train_shape[-2:]))
         self.model.add(tf.keras.layers.Dense(5))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
@@ -35,12 +56,13 @@ class Stocker:
     def train(self, EPOCHS=10):
         """ Trains model in data given during Stocker's init.
 
-            All numbers are WIP
+            WIP
         """
         self.history = self.model.fit(self.training_data, epochs=EPOCHS, \
-                            steps_per_epoch=int(self.train_shape[0]/EPOCHS), \
-                            validation_data=self.test_data, validation_steps=int(self.test_shape[0]/EPOCHS))
+                            steps_per_epoch=10, \
+                            validation_data=self.test_data)
 
+        # plot losses
         pyplot.figure()
         pyplot.plot(self.history.history['loss'], label='train')
         pyplot.plot(self.history.history['val_loss'], label='test')
@@ -52,8 +74,8 @@ class Stocker:
 
     def evaluate(self):
         """ Evalate model and output loss """
-        print(self.test_data, self.test_shape)
         self.loss= self.model.evaluate(self.test_data, steps=int(self.test_shape[0]/60))
+        print()
         print('Test LOSS: ', self.loss)
 
     def save_model(self, dir='./models/'):
@@ -66,7 +88,14 @@ class Stocker:
 
         self.model.save(dir)
 
+    def predict_data(self, data_in, sample_size, future_steps=2):
+        """ Method predicts 1 step ahead given data 
+            Sample number must be greater than batch size
+        """
 
+        predictions = pd.DataFrame(self.model.predict(data_in, steps=1), columns=self.features)
+
+        return predictions
 
 if __name__ == '__main__':
 
@@ -100,14 +129,23 @@ if __name__ == '__main__':
         split = round(len(hist.index)*7/10)
 
         # standardize data
-        data = dh.standardize(hist, split)
-
-        # convert to tf Datasets
-        train_data_set, val_data_set, train_shape, test_shape = dh.to_dataset(data, split)
+        standard = dh.standardize(hist, split)
         
         """ -------------------------------- """
 
-        model = Stocker(symbol, train_data_set, train_shape, test_shape, val_data_set)
-        model.train(20)
+        # test Stocker methods
+        model = Stocker(symbol, standard, split, hist.columns, hist.index)
+        model.train(5)
         model.evaluate()
         model.save_model()
+        predictions = model.predict_data(model.test_data, model.test_shape[0])
+
+        predictions = pd.DataFrame(np.asarray(predictions), columns=hist.columns)
+
+        print(standard)
+        pyplot.figure()
+        standard[:split][:-1].plot(subplots=True)
+        predictions[:][:-1].plot(subplots=True)
+        pyplot.legend()
+        pyplot.suptitle('Predictions')
+        pyplot.savefig('./plots/predictions.png')

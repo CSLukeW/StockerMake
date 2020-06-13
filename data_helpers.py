@@ -1,5 +1,6 @@
 from alpha_vantage.timeseries import TimeSeries
 import numpy as np
+import pandas as pd
 from scipy.ndimage.interpolation import shift
 import tensorflow as tf
 
@@ -26,7 +27,7 @@ def standardize(data, split):
     mean = values[:split].mean(axis=0)
     std = values[:split].mean(axis=0)
 
-    return (values-mean)/std
+    return pd.DataFrame((values-mean)/std, columns=data.columns, index=data.index)
 
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
