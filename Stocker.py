@@ -8,19 +8,22 @@ import numpy as np
 import argparse
 import tensorflow as tf
 from matplotlib import pyplot
+import os
 
 import data_helpers as dh
 
 class Stocker:
-    def __init__(self, training, training_shape, test, loss='mse', optimizer=tf.keras.optimizers.Adam()):
+    def __init__(self, symbol, training, training_shape, test_shape, test, loss='mse', optimizer=tf.keras.optimizers.Adam()):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
             loss function and ADAM optimizer function.
         """
+        self.symbol = symbol
         self.training_data = training
         self.test_data = test
         self.train_shape = training_shape
+        self.test_shape = test_shape
 
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
@@ -35,7 +38,7 @@ class Stocker:
             All numbers are WIP
         """
         self.history = self.model.fit(self.training_data, epochs=20, \
-                            batch_size=60, steps_per_epoch = self.train_shape[0]/60, \
+                            steps_per_epoch=int(self.train_shape[0]/60), \
                             validation_data=self.test_data, validation_steps = 50)
 
         pyplot.figure()
@@ -44,8 +47,17 @@ class Stocker:
         pyplot.xlabel('Epoch')
         pyplot.ylabel('Error')
         pyplot.legend()
-        pyplot.suptitle('Loss')
+        pyplot.suptitle('Error')
         pyplot.savefig('error.png')
+
+    def evaluate(self):
+        print(self.test_data, self.test_shape)
+        self.loss= self.model.evaluate(self.test_data, steps=int(self.test_shape[0]/60))
+        print('Test LOSS: ', self.loss)
+
+    def save_model(self, dir='./models/'):
+        dir += self.symbol+'.h5'
+        self.model.save(dir)
 
 
 
@@ -84,9 +96,11 @@ if __name__ == '__main__':
         data = dh.standardize(hist, split)
 
         # convert to tf Datasets
-        train_data_set, val_data_set, train_shape = dh.to_dataset(data, split)
+        train_data_set, val_data_set, train_shape, test_shape = dh.to_dataset(data, split)
         
         """ -------------------------------- """
 
-        model = Stocker(train_data_set, train_shape, val_data_set)
+        model = Stocker(symbol, train_data_set, train_shape, test_shape, val_data_set)
         model.train()
+        model.evaluate()
+        model.save_model()
