@@ -29,6 +29,10 @@ class Stocker:
         print(self.model.summary())
 
     def train(self):
+        """ Trains model in data given during Stocker's init.
+
+            All numbers are WIP
+        """
         self.fit = self.model.fit(self.training_data, epochs=50, \
                             batch_size=100, steps_per_epoch = 50, \
                             validation_data=self.test_data, validation_steps = 50)
@@ -61,7 +65,7 @@ if __name__ == '__main__':
         hist = dh.daily(symbol, parse.key, compact=False)
         hist.head()
         data[symbol] = hist
-        print(hist)
+        #print(hist)
         #print()
 
         pyplot.figure()
@@ -73,30 +77,10 @@ if __name__ == '__main__':
         split = round(len(hist.index)*7/10)
 
         # standardize data
-        data = hist.values
-        mean = data[:split].mean(axis=0)
-        std = data[:split].mean(axis=0)
-
-        data = (data-mean)/std
-
-        # split into training and test datasets
-        past = 7
-        future = 7
-        step = 1
-        buffer = 100
-        batch = 100
-
-        train_in, train_out = dh.single_step_data(data, data[:, 1], 0, split, past, future, step)
-        val_in, val_out = dh.single_step_data(data, data[:, 1], split, None, past, future, step)
-        train_shape = train_in.shape
-        print(train_shape)
+        data = dh.standardize(hist, split)
 
         # convert to tf Datasets
-        train_data_set = tf.data.Dataset.from_tensor_slices((train_in, train_out))
-        train_data_set = train_data_set.cache().shuffle(buffer).batch(batch).repeat()
-
-        val_data_set = tf.data.Dataset.from_tensor_slices((val_in, val_out))
-        val_data_set = val_data_set.batch(batch).repeat()
+        train_data_set, val_data_set, train_shape = dh.to_dataset(data, split)
         
         """ -------------------------------- """
 
