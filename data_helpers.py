@@ -30,8 +30,8 @@ def standardize(data, split):
 
 def to_dataset(data, split):
     """Returns 2-tuple of training dataset and validation dataset for input into LSTM"""
-    past = 30
-    future = 7
+    past = 60
+    future = 1
     step = 1
     buffer = 60
     batch = 60

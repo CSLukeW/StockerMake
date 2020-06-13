@@ -20,6 +20,7 @@ class Stocker:
         """
         self.training_data = training
         self.test_data = test
+        self.train_shape = training_shape
 
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
@@ -33,17 +34,19 @@ class Stocker:
 
             All numbers are WIP
         """
-        self.fit = self.model.fit(self.training_data, epochs=50, \
-                            batch_size=100, steps_per_epoch = 50, \
+        self.history = self.model.fit(self.training_data, epochs=20, \
+                            batch_size=60, steps_per_epoch = self.train_shape[0]/60, \
                             validation_data=self.test_data, validation_steps = 50)
 
         pyplot.figure()
-        pyplot.plot(self.fit.history['loss'], label='train')
-        pyplot.plot(self.fit.history['val_loss'], label='test')
+        pyplot.plot(self.history.history['loss'], label='train')
+        pyplot.plot(self.history.history['val_loss'], label='test')
         pyplot.xlabel('Epoch')
         pyplot.ylabel('Error')
         pyplot.legend()
-        pyplot.savefig('trained.png')
+        pyplot.suptitle('Loss')
+        pyplot.savefig('error.png')
+
 
 
 if __name__ == '__main__':
@@ -70,6 +73,7 @@ if __name__ == '__main__':
 
         pyplot.figure()
         hist.plot(subplots=True)
+        pyplot.suptitle('Input Features')
         pyplot.savefig('input.png')
 
         """ Data Preprocessing """
