@@ -14,14 +14,14 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=1e-6)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
             loss function and ADAM optimizer function.
         """
 
-        past = 30
+        past = 60
         future = 1
         step = 1
         buffer = 32
@@ -36,10 +36,6 @@ class Stocker:
         self.train_in, self.train_out = dh.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
         self.val_in, self.val_out = dh.single_step_data(data_numpy, data_numpy[:, 4], split, None, past, future, step)
 
-        # store tf.Dataset format
-        self.training_data = tf.data.Dataset.from_tensor_slices((self.train_in, self.train_out)).cache().batch(batch).repeat()
-        self.test_data = tf.data.Dataset.from_tensor_slices((self.val_in, self.val_out)).batch(batch).repeat()
-
         # store data attributes
         self.symbol = symbol
         self.train_shape = self.train_in.shape
@@ -50,9 +46,10 @@ class Stocker:
 
         # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
-                                            input_shape=self.train_shape[-2:]))
-        self.model.add(tf.keras.layers.Dense(1))
+        self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
+                                                input_shape=self.train_shape[-2:], return_sequences=True))
+        self.model.add(tf.keras.layers.Dropout(.5))
+        self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
 
@@ -61,9 +58,8 @@ class Stocker:
 
             WIP
         """
-        self.history = self.model.fit(self.training_data, epochs=EPOCHS, \
-                            steps_per_epoch=1, \
-                            validation_data=self.test_data, validation_steps=1)
+        self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
+                            validation_data=(self.val_in, self.val_out))
 
         # plot losses
         pyplot.figure()
@@ -74,10 +70,11 @@ class Stocker:
         pyplot.legend()
         pyplot.suptitle('Error')
         pyplot.savefig('./plots/error.png')
+        print()
 
     def evaluate(self):
         """ Evalate model and output loss """
-        self.loss= self.model.evaluate(self.test_data, steps=int(self.test_shape[0]/60))
+        self.loss= self.model.evaluate(x=self.val_in, y=self.val_out)
         print()
         print('Test LOSS: ', self.loss)
 
@@ -96,7 +93,7 @@ class Stocker:
             Sample number must be greater than batch size
         """
 
-        predictions = self.model.predict(data_in, steps=future_steps)
+        predictions = self.model.predict(data_in, verbose=1)
 
         return predictions
 
@@ -146,23 +143,20 @@ if __name__ == '__main__':
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(250)
+        model.train(50)
         model.evaluate()
         model.save_model()
-        predictions = model.predict_data(model.test_data, model.test_shape[0])
+        predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         print(predictions)
 
-        raw_predictions = mean + predictions*std
-        raw_df = pd.DataFrame(raw_predictions, columns=model.features)
-
-        print(raw_predictions)
-
         pyplot.figure()
-        hist[split:]['5. adjusted close'].plot(subplots=True)
+        standard[split:]['5. adjusted close'].plot(subplots=True)
         pyplot.legend()
         pyplot.savefig('./plots/truevals.png')
         pyplot.figure()
-        raw_df.plot(subplots=True)
+        pyplot.plot(y=predictions[:, :, 0])
+        pyplot.xlabel('Time Step')
+        pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
         pyplot.savefig('./plots/predictions.png')
