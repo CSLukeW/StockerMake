@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.ndimage.interpolation import shift
 import tensorflow as tf
 
-def daily(symbol, key, compact=True):
+def daily_adjusted(symbol, key, compact=True):
     """ Returns data frame of queried data
 
         symbol -- symbol of desired stock
@@ -15,9 +15,9 @@ def daily(symbol, key, compact=True):
 
     ts = TimeSeries(key=key, output_format='pandas')
     if compact:
-        data, _ = ts.get_daily(symbol=symbol, outputsize='compact')
+        data, _ = ts.get_daily_adjusted(symbol=symbol, outputsize='compact')
     else:
-        data, _ = ts.get_daily(symbol=symbol, outputsize='full')
+        data, _ = ts.get_daily_adjusted(symbol=symbol, outputsize='full')
 
     return data
 
