@@ -114,7 +114,6 @@ if __name__ == '__main__':
         # read historical daily data from alpha_vantage
         # store in python dict
         hist = dh.daily(symbol, parse.key, compact=False)
-        hist.head()
         data[symbol] = hist
         #print(hist)
         #print()
@@ -129,7 +128,7 @@ if __name__ == '__main__':
         split = round(len(hist.index)*7/10)
 
         # standardize data
-        standard = dh.standardize(hist, split)
+        standard, mean, std = dh.standardize(hist, split)
 
         pyplot.figure()
         standard.plot(subplots=True)
@@ -147,13 +146,15 @@ if __name__ == '__main__':
 
         predictions = pd.DataFrame(np.asarray(predictions), columns=hist.columns)
 
+        raw_predictions = mean + predictions*std
+
         pyplot.figure()
         standard[:split][:-1].plot(subplots=True)
         pyplot.legend()
         pyplot.suptitle('True Values')
         pyplot.savefig('./plots/truevals.png')
 
-        predictions[:][:-1].plot(subplots=True)
+        raw_predictions[:][:-1].plot(subplots=True)
         pyplot.legend()
         pyplot.suptitle('Predictions')
         pyplot.savefig('./plots/predictions.png')

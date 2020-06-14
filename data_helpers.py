@@ -27,7 +27,7 @@ def standardize(data, split):
     mean = values[:split].mean(axis=0)
     std = values[:split].mean(axis=0)
 
-    return pd.DataFrame((values-mean)/std, columns=data.columns, index=data.index)
+    return pd.DataFrame((values-mean)/std, columns=data.columns, index=data.index), mean, std
 
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
