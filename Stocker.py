@@ -48,7 +48,8 @@ class Stocker:
         # create and store model
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
-                                            input_shape=self.train_shape[-2:]))
+                                            input_shape=self.train_shape[-2:], return_sequences=True))
+        self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid'))
         self.model.add(tf.keras.layers.Dense(5))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
@@ -59,7 +60,7 @@ class Stocker:
             WIP
         """
         self.history = self.model.fit(self.training_data, epochs=EPOCHS, \
-                            steps_per_epoch=10, \
+                            steps_per_epoch=self.train_shape[0]/self.batch/EPOCHS, \
                             validation_data=self.test_data, validation_steps=1)
 
         # plot losses
@@ -149,11 +150,12 @@ if __name__ == '__main__':
         raw_predictions = mean + predictions*std
 
         pyplot.figure()
-        standard[:split][:-1].plot(subplots=True)
+        hist[:split][:-1].plot(subplots=True)
         pyplot.legend()
         pyplot.suptitle('True Values')
         pyplot.savefig('./plots/truevals.png')
 
+        pyplot.figure()
         raw_predictions[:][:-1].plot(subplots=True)
         pyplot.legend()
         pyplot.suptitle('Predictions')
