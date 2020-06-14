@@ -155,7 +155,7 @@ if __name__ == '__main__':
         pyplot.legend()
         pyplot.savefig('./plots/truevals.png')
         pyplot.figure()
-        pyplot.plot(y=predictions[:, :, 0])
+        pyplot.plot(predictions[:, 0])
         pyplot.xlabel('Time Step')
         pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
