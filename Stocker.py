@@ -48,7 +48,6 @@ class Stocker:
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
-        self.model.add(tf.keras.layers.Dropout(.2, name='Drop1'))
         self.model.add(tf.keras.layers.LSTM(5, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
@@ -130,25 +129,23 @@ if __name__ == '__main__':
         split = round(len(hist.index)*7/10)
 
         # standardize data
-        standard, mean, std = dh.standardize(hist, split)
-
-        print(standard)
+        _, mean, std = dh.standardize(hist, split)
 
         pyplot.figure()
-        standard.plot(subplots=True)
-        pyplot.suptitle('Standardized Features')
+        hist['5. adjusted close'].plot()
+        pyplot.suptitle('Standardized')
         pyplot.savefig('./plots/standardized.png')
         
         """ -------------------------------- """
 
         # test Stocker methods
-        model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(70)
+        model = Stocker(symbol, hist, split, hist.columns, hist.index)
+        model.train(100)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
-        standard_numpy = standard[split:]['5. adjusted close'].to_numpy()
+        standard_numpy = hist[split:]['5. adjusted close'].to_numpy()
         pyplot.figure()
         pyplot.plot(standard_numpy, label='True Values')
         pyplot.plot(predictions[:, 0], label='Predictions')
