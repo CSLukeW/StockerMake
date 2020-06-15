@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.01)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -30,7 +30,7 @@ class Stocker:
         self.all_data_df = data
         data_numpy = data.to_numpy()
 
-        batch = 20
+        batch = 50
         print(data_numpy.shape[0]-split, split)
 
         # store data in numpy format
@@ -59,8 +59,10 @@ class Stocker:
 
             WIP
         """
+        early = tf.keras.callbacks.EarlyStopping(patience=5, verbose=1, mode='min')
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_data=(self.val_in, self.val_out), batch_size=self.batch)
+                            validation_data=(self.val_in, self.val_out), batch_size=self.batch, \
+                                callbacks=[early])
 
         # plot losses
         pyplot.figure()
@@ -143,7 +145,7 @@ if __name__ == '__main__':
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(400)
+        model.train(150)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
