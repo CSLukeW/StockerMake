@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=1e-6)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -147,12 +147,10 @@ if __name__ == '__main__':
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         pyplot.figure()
-        standard[split:]['5. adjusted close'].plot(subplots=True)
+        standard[split:]['5. adjusted close'].plot()
         pyplot.legend()
-        pyplot.suptitle('True Adjuted Close')
-        pyplot.savefig('./plots/truevals.png')
         pyplot.figure()
-        pyplot.plot(predictions[:, 0])
+        pyplot.plot(predictions[:, 0], label='Predictions')
         pyplot.xlabel('Time Step')
         pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
