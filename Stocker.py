@@ -89,6 +89,10 @@ class Stocker:
 
         self.model.save(dir)
 
+    def load(self, dir):
+        self.model = tf.keras.models.load_model(dir)
+        print(self.model.summary())
+
     def predict_data(self, data_in, sample_size, future_steps=1):
         """ Method predicts 1 step ahead given data 
             Sample number must be greater than batch size
@@ -144,6 +148,7 @@ if __name__ == '__main__':
         model.train(100)
         model.evaluate()
         model.save_model()
+        model.load('./models/FORD.h5')
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         standard_numpy = hist[split:]['5. adjusted close'].to_numpy()
