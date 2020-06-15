@@ -24,8 +24,8 @@ def daily_adjusted(symbol, key, compact=True):
 def standardize(data, split):
     """ Standardize data using z-value """
     values = data.values
-    mean = values[:split].mean(axis=0)
-    std = values[:split].mean(axis=0)
+    mean = values.mean(axis=0)
+    std = values.mean(axis=0)
 
     return pd.DataFrame((values-mean)/std, columns=data.columns, index=data.index), mean, std
 
