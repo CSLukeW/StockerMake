@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -48,7 +48,8 @@ class Stocker:
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
-        self.model.add(tf.keras.layers.LSTM(5, activation='tanh', recurrent_activation='sigmoid', \
+        self.model.add(tf.keras.layers.Dropout(.2))
+        self.model.add(tf.keras.layers.LSTM(20, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
