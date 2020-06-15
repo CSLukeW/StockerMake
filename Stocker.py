@@ -132,27 +132,24 @@ if __name__ == '__main__':
         # standardize data
         standard, mean, std = dh.standardize(hist, split)
 
-        """
         pyplot.figure()
         standard.plot(subplots=True)
         pyplot.suptitle('Standardized Features')
         pyplot.savefig('./plots/standardized.png')
-        """
         
         """ -------------------------------- """
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(50)
+        model.train(1000)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
-        print(predictions)
-
         pyplot.figure()
         standard[split:]['5. adjusted close'].plot(subplots=True)
         pyplot.legend()
+        pyplot.suptitle('True Adjuted Close')
         pyplot.savefig('./plots/truevals.png')
         pyplot.figure()
         pyplot.plot(predictions[:, 0])
