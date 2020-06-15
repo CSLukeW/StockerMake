@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.01)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -24,14 +24,13 @@ class Stocker:
         past = 60
         future = 1
         step = 1
-        buffer = 32
+        buffer = 50
 
 
         self.all_data_df = data
         data_numpy = data.to_numpy()
 
         batch = 50
-        print(data_numpy.shape[0]-split, split)
 
         # store data in numpy format
         self.train_in, self.train_out = dh.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
@@ -47,9 +46,11 @@ class Stocker:
 
         # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(40, activation='tanh', recurrent_activation='sigmoid', \
+        self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
-        self.model.add(tf.keras.layers.Dropout(.5, name='Drop1'))
+        self.model.add(tf.keras.layers.Dropout(.2, name='Drop1'))
+        self.model.add(tf.keras.layers.LSTM(5, activation='tanh', recurrent_activation='sigmoid', \
+                                                input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
@@ -59,10 +60,9 @@ class Stocker:
 
             WIP
         """
-        early = tf.keras.callbacks.EarlyStopping(patience=5, verbose=1, mode='min')
+        #early = tf.keras.callbacks.EarlyStopping(patience=10, verbose=1, mode='min')
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_data=(self.val_in, self.val_out), batch_size=self.batch, \
-                                callbacks=[early])
+                            validation_split=.3, batch_size=self.batch)
 
         # plot losses
         pyplot.figure()
@@ -77,9 +77,7 @@ class Stocker:
 
     def evaluate(self):
         """ Evalate model and output loss """
-        self.loss= self.model.evaluate(x=self.val_in, y=self.val_out, batch_size=self.batch)
-        print()
-        print('Test LOSS: ', self.loss)
+        self.loss = self.model.evaluate(x=self.val_in, y=self.val_out, batch_size=self.batch)
 
     def save_model(self, dir='./models/'):
         """ Save model to given folder. models folder is default """
@@ -145,14 +143,12 @@ if __name__ == '__main__':
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(150)
+        model.train(70)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         standard_numpy = standard[split:]['5. adjusted close'].to_numpy()
-        print(standard_numpy.shape)
-        print(predictions[:, 0].shape)
         pyplot.figure()
         pyplot.plot(standard_numpy, label='True Values')
         pyplot.plot(predictions[:, 0], label='Predictions')
