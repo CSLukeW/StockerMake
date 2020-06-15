@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -46,7 +46,7 @@ class Stocker:
 
         # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
+        self.model.add(tf.keras.layers.LSTM(30, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True))
         self.model.add(tf.keras.layers.Dropout(.5))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
@@ -141,17 +141,17 @@ if __name__ == '__main__':
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(1000)
+        model.train(200)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
+        standard_numpy = standard[split:]['5. adjusted close'].to_numpy()
         pyplot.figure()
-        standard[split:]['5. adjusted close'].plot()
-        pyplot.legend()
-        pyplot.figure()
+        pyplot.plot(standard_numpy, label='True Values')
         pyplot.plot(predictions[:, 0], label='Predictions')
         pyplot.xlabel('Time Step')
         pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
+        pyplot.legend()
         pyplot.savefig('./plots/predictions.png')
