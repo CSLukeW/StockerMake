@@ -14,7 +14,7 @@ import data_helpers as dh
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.001)):
+                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -30,7 +30,8 @@ class Stocker:
         self.all_data_df = data
         data_numpy = data.to_numpy()
 
-        batch = data_numpy.shape[0]
+        batch = 20
+        print(data_numpy.shape[0]-split, split)
 
         # store data in numpy format
         self.train_in, self.train_out = dh.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
@@ -46,9 +47,9 @@ class Stocker:
 
         # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(30, activation='tanh', recurrent_activation='sigmoid', \
-                                                input_shape=self.train_shape[-2:], return_sequences=True))
-        self.model.add(tf.keras.layers.Dropout(.5))
+        self.model.add(tf.keras.layers.LSTM(40, activation='tanh', recurrent_activation='sigmoid', \
+                                                input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
+        self.model.add(tf.keras.layers.Dropout(.5, name='Drop1'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
@@ -59,7 +60,7 @@ class Stocker:
             WIP
         """
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_data=(self.val_in, self.val_out))
+                            validation_data=(self.val_in, self.val_out), batch_size=self.batch)
 
         # plot losses
         pyplot.figure()
@@ -74,7 +75,7 @@ class Stocker:
 
     def evaluate(self):
         """ Evalate model and output loss """
-        self.loss= self.model.evaluate(x=self.val_in, y=self.val_out)
+        self.loss= self.model.evaluate(x=self.val_in, y=self.val_out, batch_size=self.batch)
         print()
         print('Test LOSS: ', self.loss)
 
@@ -108,13 +109,12 @@ if __name__ == '__main__':
     parse = parser.parse_args()
 
     data = {}
-
     for symbol in parse.symbols:
 
         # read historical daily data from alpha_vantage
         # store in python dict
         hist = dh.daily_adjusted(symbol, parse.key, compact=False)
-        hist = hist.drop(['7. dividend amount', '8. split coefficient'], axis=1)
+        hist = hist.drop(['6. volume', '7. dividend amount', '8. split coefficient'], axis=1)
         hist = hist.reindex(index=hist.index[::-1])
         data[symbol] = hist
         print(hist)
@@ -132,6 +132,8 @@ if __name__ == '__main__':
         # standardize data
         standard, mean, std = dh.standardize(hist, split)
 
+        print(standard)
+
         pyplot.figure()
         standard.plot(subplots=True)
         pyplot.suptitle('Standardized Features')
@@ -141,12 +143,14 @@ if __name__ == '__main__':
 
         # test Stocker methods
         model = Stocker(symbol, standard, split, hist.columns, hist.index)
-        model.train(200)
+        model.train(400)
         model.evaluate()
         model.save_model()
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         standard_numpy = standard[split:]['5. adjusted close'].to_numpy()
+        print(standard_numpy.shape)
+        print(predictions[:, 0].shape)
         pyplot.figure()
         pyplot.plot(standard_numpy, label='True Values')
         pyplot.plot(predictions[:, 0], label='Predictions')
