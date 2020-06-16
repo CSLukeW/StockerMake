@@ -53,6 +53,6 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
 
 def make_dir(dir):
     if not os.path.exists(dir):
-            os.mkdir(dir)
+        os.makedirs(dir)
 
     return dir
