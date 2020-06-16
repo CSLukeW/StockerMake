@@ -23,7 +23,7 @@ def daily_adjusted(symbol, key, compact=True):
 
     return data
 
-def normalize(data, split):
+def normalize(data):
     """ Standardize data using z-value """
     scaler = MinMaxScaler()
 
@@ -48,7 +48,7 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
 
         labels.append(target[i+target_size])
 
-    return np.array(dataset), np.array(labels)
+    return normalize(np.array(dataset)), np.array(labels)
 
 def make_dir(dir):
     if not os.path.exists(dir):
