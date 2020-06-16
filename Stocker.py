@@ -11,7 +11,7 @@ from matplotlib import pyplot
 import os
 from sklearn.preprocessing import MinMaxScaler
 
-import data_helpers as dh
+import helpers as helper
 
 class Stocker:
     def __init__(self, symbol, data, split, feature_labels, row_labels, \
@@ -34,8 +34,8 @@ class Stocker:
         batch = 50
 
         # store data in numpy format
-        self.train_in, self.train_out = dh.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
-        self.val_in, self.val_out = dh.single_step_data(data_numpy, data_numpy[:, 4], split, None, past, future, step)
+        self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
+        self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, past, future, step)
 
         # store data attributes
         self.symbol = symbol
@@ -73,7 +73,7 @@ class Stocker:
         pyplot.ylabel('Error')
         pyplot.legend()
         pyplot.suptitle('Error')
-        pyplot.savefig('./plots/error.png')
+        pyplot.savefig(helper.make_dir('./plots/' + self.symbol) + '/error.png')
         print()
 
     def evaluate(self):
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
         # read historical daily data from alpha_vantage
         # store in python dict
-        hist = dh.daily_adjusted(symbol, parse.key, compact=False)
+        hist = helper.daily_adjusted(symbol, parse.key, compact=False)
         hist = hist.drop(['6. volume', '7. dividend amount', '8. split coefficient'], axis=1)
         hist = hist.reindex(index=hist.index[::-1])
         data[symbol] = hist
@@ -128,7 +128,7 @@ if __name__ == '__main__':
         pyplot.figure()
         hist.plot(subplots=True)
         pyplot.suptitle('Input Features')
-        pyplot.savefig('./plots/input.png')
+        pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/input.png')
 
         """ Data Preprocessing """
         
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         pyplot.figure()
         normal['5. adjusted close'].plot()
         pyplot.suptitle('Standardized')
-        pyplot.savefig('./plots/normalized.png')
+        pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/normalized.png')
         
         """ -------------------------------- """
 
@@ -150,7 +150,7 @@ if __name__ == '__main__':
         model.train(100)
         model.evaluate()
         model.save_model()
-        model.load('./models/FORD.h5')
+        model.load('./models/' + symbol + '.h5')
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         standard_numpy = hist[split:]['5. adjusted close'].to_numpy()
@@ -161,4 +161,4 @@ if __name__ == '__main__':
         pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
         pyplot.legend()
-        pyplot.savefig('./plots/' + symbol + '/predictions.png')
+        pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/predictions.png')
