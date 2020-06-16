@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.ndimage.interpolation import shift
 import tensorflow as tf
 import os
+from sklearn.preprocessing import MinMaxScaler
 
 def daily_adjusted(symbol, key, compact=True):
     """ Returns data frame of queried data
@@ -22,13 +23,11 @@ def daily_adjusted(symbol, key, compact=True):
 
     return data
 
-def standardize(data, split):
+def normalize(data, split):
     """ Standardize data using z-value """
-    values = data.values
-    mean = values.mean(axis=0)
-    std = values.mean(axis=0)
+    scaler = MinMaxScaler()
 
-    return pd.DataFrame((values-mean)/std, columns=data.columns, index=data.index), mean, std
+    return scaler.fit_transform(data)
 
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
