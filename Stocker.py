@@ -9,6 +9,7 @@ import argparse
 import tensorflow as tf
 from matplotlib import pyplot
 import os
+from sklearn.preprocessing import MinMaxScaler
 
 import data_helpers as dh
 
@@ -133,13 +134,14 @@ if __name__ == '__main__':
         
         split = round(len(hist.index)*7/10)
 
-        # standardize data
-        _, mean, std = dh.standardize(hist, split)
+        # normalize data
+        scaler = MinMaxScaler()
+        normal = pd.DataFrame(scaler.fit_transform(hist), columns=hist.columns, index=hist.index)
 
         pyplot.figure()
-        hist['5. adjusted close'].plot()
+        normal['5. adjusted close'].plot()
         pyplot.suptitle('Standardized')
-        pyplot.savefig('./plots/standardized.png')
+        pyplot.savefig('./plots/normalized.png')
         
         """ -------------------------------- """
 
@@ -159,4 +161,4 @@ if __name__ == '__main__':
         pyplot.ylabel('Adjusted Close')
         pyplot.suptitle('Predictions')
         pyplot.legend()
-        pyplot.savefig('./plots/predictions.png')
+        pyplot.savefig('./plots/' + symbol + '/predictions.png')
