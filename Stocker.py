@@ -25,7 +25,7 @@ class Stocker:
         past = 60
         future = 1
         step = 1
-        buffer = 50
+        buffer = 60
 
 
         self.all_data_df = data
