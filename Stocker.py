@@ -25,13 +25,13 @@ class Stocker:
         past = 60
         future = 1
         step = 1
-        buffer = 60
+        buffer = 50
 
 
         self.all_data_df = data
         data_numpy = data.to_numpy()
 
-        batch = 50
+        batch = 70
 
         # store data in numpy format
         self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
@@ -49,8 +49,8 @@ class Stocker:
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
-        self.model.add(tf.keras.layers.Dropout(.5))
-        self.model.add(tf.keras.layers.LSTM(40, activation='tanh', recurrent_activation='sigmoid', \
+        self.model.add(tf.keras.layers.Dropout(.2))
+        self.model.add(tf.keras.layers.LSTM(20, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
@@ -61,9 +61,9 @@ class Stocker:
 
             WIP
         """
-        early = tf.keras.callbacks.EarlyStopping(patience=10, verbose=1, mode='min')
+        #early = tf.keras.callbacks.EarlyStopping(patience=30, verbose=1, mode='min')
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_split=.3, batch_size=self.batch, callbacks=[early])
+                            validation_split=.3, batch_size=self.batch)
 
         # plot losses
         pyplot.figure()
@@ -133,6 +133,10 @@ if __name__ == '__main__':
         """ Data Preprocessing """
         
         split = round(len(hist.index)*7/10)
+
+        # normalize data
+        scaler = MinMaxScaler()
+        normal = pd.DataFrame(scaler.fit_transform(hist), columns=hist.columns, index=hist.index)
         
         """ -------------------------------- """
 
@@ -141,7 +145,7 @@ if __name__ == '__main__':
         model.train(100)
         model.evaluate()
         model.save_model()
-        model.load('./models/' + symbol + '.h5')
+        #model.load('./models/' + symbol + '.h5')
         predictions = model.predict_data(model.val_in, model.test_shape[0])
 
         standard_numpy = hist[split:]['5. adjusted close'].to_numpy()

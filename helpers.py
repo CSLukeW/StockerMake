@@ -23,19 +23,11 @@ def daily_adjusted(symbol, key, compact=True):
 
     return data
 
-def normalize(data):
-    """ Standardize data using z-value """
-    scaler = MinMaxScaler()
-
-    return scaler.fit_transform(data)
-
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
     """
     Converts dataframe to numpy arrays with correct LSTM input format.
     """
-
-    data = normalize(data)
 
     dataset=[]
     labels=[]
