@@ -61,9 +61,9 @@ class Stocker:
 
             WIP
         """
-        #early = tf.keras.callbacks.EarlyStopping(patience=10, verbose=1, mode='min')
+        early = tf.keras.callbacks.EarlyStopping(patience=10, verbose=1, mode='min')
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_split=.3, batch_size=self.batch)
+                            validation_split=.3, batch_size=self.batch, callbacks=[early])
 
         # plot losses
         pyplot.figure()
