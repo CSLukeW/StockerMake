@@ -49,8 +49,8 @@ class Stocker:
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
-        self.model.add(tf.keras.layers.Dropout(.2))
-        self.model.add(tf.keras.layers.LSTM(20, activation='tanh', recurrent_activation='sigmoid', \
+        self.model.add(tf.keras.layers.Dropout(.5))
+        self.model.add(tf.keras.layers.LSTM(40, activation='tanh', recurrent_activation='sigmoid', \
                                                 input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
