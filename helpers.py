@@ -35,6 +35,8 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
     Converts dataframe to numpy arrays with correct LSTM input format.
     """
 
+    data = normalize(data)
+
     dataset=[]
     labels=[]
 
@@ -48,7 +50,9 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
 
         labels.append(target[i+target_size])
 
-    return normalize(np.array(dataset)), np.array(labels)
+    print(np.array(dataset).shape)
+
+    return np.array(dataset), np.array(labels)
 
 def make_dir(dir):
     if not os.path.exists(dir):
