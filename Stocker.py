@@ -133,15 +133,6 @@ if __name__ == '__main__':
         """ Data Preprocessing """
         
         split = round(len(hist.index)*7/10)
-
-        # normalize data
-        scaler = MinMaxScaler()
-        normal = pd.DataFrame(scaler.fit_transform(hist), columns=hist.columns, index=hist.index)
-
-        pyplot.figure()
-        normal['5. adjusted close'].plot()
-        pyplot.suptitle('Standardized')
-        pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/normalized.png')
         
         """ -------------------------------- """
 
