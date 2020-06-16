@@ -14,12 +14,14 @@ from sklearn.preprocessing import MinMaxScaler
 import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, split, batch=32, loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
+    def __init__(self, symbol, data, split, batch=32, loss='mse', learning_rate=.001):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
             loss function and ADAM optimizer function.
         """
+
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
         past = 60
         future = 1
@@ -100,6 +102,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Model Training Script")
     parser.add_argument('key', help='User API Key')
     parser.add_argument('-outdir', metavar='out', default='/models/', help="Directory for stored model(s) (one for each symbol).")
+    parser.add_argument('--plots=True', action='store_true', help='Saves all plots to plots folder')
     parser.add_argument('symbols', nargs=argparse.REMAINDER, help="List of symbols to train (Place all at end of command)")
     parse = parser.parse_args()
 
@@ -132,7 +135,7 @@ if __name__ == '__main__':
         model.evaluate()
         model.save_model()
         #model.load('./models/' + symbol + '.h5')
-        predictions = model.predict_data(model.val_in, model.test_shape[0])
+        predictions = model.predict_data(model.val_in)
 
         standard_numpy = hist[split:]['5. adjusted close'].to_numpy()
         pyplot.figure()
