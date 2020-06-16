@@ -135,7 +135,7 @@ dmypy.json
 key.txt
 
 # plots
-*.png
+/plots/
 
 # models
 /models/*.h5
