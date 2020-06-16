@@ -26,8 +26,13 @@ def daily_adjusted(symbol, key, compact=True):
 def single_step_data(data, target, start, end, history_size, target_size, step):
 
     """
-    Converts dataframe to numpy arrays with correct LSTM input format.
+    Splits numpy array of data into x and y
     """
+
+    #scaler = MinMaxScaler()
+    #data = scaler.fit_transform(data)
+
+    print(data)
 
     dataset=[]
     labels=[]

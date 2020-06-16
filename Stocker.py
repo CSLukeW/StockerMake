@@ -14,8 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, split, feature_labels, row_labels, \
-                    loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.001)):
+    def __init__(self, symbol, data, split, batch=32, loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=.0001)):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -27,31 +26,22 @@ class Stocker:
         step = 1
         buffer = 50
 
-
-        self.all_data_df = data
         data_numpy = data.to_numpy()
 
-        batch = 70
+        self.batch = batch
+        self.symbol = symbol
 
         # store data in numpy format
         self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past, future, step)
         self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, past, future, step)
 
-        # store data attributes
-        self.symbol = symbol
-        self.train_shape = self.train_in.shape
-        self.test_shape = self.val_in.shape
-        self.features = feature_labels
-        self.samples = row_labels
-        self.batch = batch
-
         # create and store model
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.LSTM(60, activation='tanh', recurrent_activation='sigmoid', \
-                                                input_shape=self.train_shape[-2:], return_sequences=True, name='Input'))
+        self.model.add(tf.keras.layers.LSTM(100, activation='tanh', recurrent_activation='sigmoid', \
+                                                input_shape=self.train_in.shape[-2:], return_sequences=True, name='Input'))
         self.model.add(tf.keras.layers.Dropout(.2))
-        self.model.add(tf.keras.layers.LSTM(20, activation='tanh', recurrent_activation='sigmoid', \
-                                                input_shape=self.train_shape[-2:], return_sequences=True, name='Hidden'))
+        self.model.add(tf.keras.layers.LSTM(50, activation='tanh', recurrent_activation='sigmoid', \
+                                                input_shape=self.train_in.shape[-2:], return_sequences=True, name='Hidden'))
         self.model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(1)))
         self.model.compile(loss=loss, optimizer=optimizer)
         print(self.model.summary())
@@ -61,9 +51,9 @@ class Stocker:
 
             WIP
         """
-        #early = tf.keras.callbacks.EarlyStopping(patience=30, verbose=1, mode='min')
+        early = tf.keras.callbacks.EarlyStopping(patience=5, verbose=1, mode='min')
         self.history = self.model.fit(x=self.train_in, y=self.train_out, epochs=EPOCHS, \
-                            validation_split=.3, batch_size=self.batch)
+                            validation_split=.2, batch_size=self.batch, callbacks=[early])
 
         # plot losses
         pyplot.figure()
@@ -94,7 +84,7 @@ class Stocker:
         self.model = tf.keras.models.load_model(dir)
         print(self.model.summary())
 
-    def predict_data(self, data_in, sample_size, future_steps=1):
+    def predict_data(self, data_in):
         """ Method predicts 1 step ahead given data 
             Sample number must be greater than batch size
         """
@@ -133,15 +123,11 @@ if __name__ == '__main__':
         """ Data Preprocessing """
         
         split = round(len(hist.index)*7/10)
-
-        # normalize data
-        scaler = MinMaxScaler()
-        normal = pd.DataFrame(scaler.fit_transform(hist), columns=hist.columns, index=hist.index)
         
         """ -------------------------------- """
 
         # test Stocker methods
-        model = Stocker(symbol, hist, split, hist.columns, hist.index)
+        model = Stocker(symbol, hist, split, batch=70)
         model.train(100)
         model.evaluate()
         model.save_model()
