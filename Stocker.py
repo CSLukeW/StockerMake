@@ -14,7 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, split, batch=32, loss='mse', learning_rate=.001):
+    def __init__(self, symbol, data, depth, batch, test_size, loss, optimizer, learning_rate, inpath):
         """ Creating Stocker instance immediately creates model 
 
             Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
@@ -101,8 +101,16 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Model Training Script")
     parser.add_argument('key', help='User API Key')
-    parser.add_argument('-outdir', metavar='out', default='/models/', help="Directory for stored model(s) (one for each symbol).")
-    parser.add_argument('--plots=True', action='store_true', help='Saves all plots to plots folder')
+    parser.add_argument('-depth', default=1, help='Depth of LSTM neural net, (default 1)')
+    parser.add_argument('-batch', default=50, help='Batch size (default 50)')
+    parser.add_argument('-test_size', default=.2, help='Percentage of samples to use for testing (decimal form)')
+    parser.add_argument('-loss', default='mse', help='Loss function for Neural Net')
+    parser.add_argument('-optimizer', default='adam', help='Keras optimizer for Neural Net')
+    parser.add_argument('-learning_rate', default=.001, help='Learning rate of Neural Net (Default .001)')
+    parser.add_argument('-epochs', default=100, help='Epoch count for training (Default 100)')
+    parser.add_argument('-model_in', default=None, help='Path of pre-made model to load')
+    parser.add_argument('--early_stop', action='store_true', default=False, help='Apply early stopping to model training (Patience 10)')
+    parser.add_argument('--plots', action='store_true', help='Saves all plots to plots folder')
     parser.add_argument('symbols', nargs=argparse.REMAINDER, help="List of symbols to train (Place all at end of command)")
     parse = parser.parse_args()
 
@@ -118,20 +126,16 @@ if __name__ == '__main__':
         print(hist)
         print()
 
-        pyplot.figure()
-        hist.plot(subplots=True)
-        pyplot.suptitle('Input Features')
-        pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/input.png')
-
-        """ Data Preprocessing """
-        
-        split = round(len(hist.index)*7/10)
-        
-        """ -------------------------------- """
+        if parse.plots:
+            pyplot.figure()
+            hist.plot(subplots=True)
+            pyplot.suptitle('Input Features')
+            pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/input.png')
 
         # test Stocker methods
-        model = Stocker(symbol, hist, split, batch=70)
-        model.train(100)
+        model = Stocker(symbol, hist, parse.depth, parse.batch, parse.test_size, parse.loss, \
+                            parse.optimizer, parse.learning_rate, parse.model_in)
+        model.train()
         model.evaluate()
         model.save_model()
         #model.load('./models/' + symbol + '.h5')
