@@ -1,4 +1,4 @@
-# Stocker: ***ML-Powered Stock Market Prediction***
+# Stocker: Modular Prototyping Tool for Stock Market Prediction Models
 
 Built in python 3.6.9
 
