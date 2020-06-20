@@ -1,4 +1,16 @@
-""" training script """
+""" 
+Author: Luke Williams
+
+License: LGPLv3
+
+Stocker module for easy, modular prototyping of LSTM neural networks. 
+
+Coming soon:
+    Support for more layer types
+    Multi-step future models
+    Optimizer customization
+    Customizable past-window (how far back to look)
+"""
 
 import matplotlib
 matplotlib.use('Agg')
@@ -14,26 +26,39 @@ from sklearn.preprocessing import MinMaxScaler
 import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, depth, node_counts, batch, test_size, loss, learning_rate, inpath):
+    def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None):
         """ Creating Stocker instance immediately creates model 
 
-            Model (WIP) is a two-layer LSTM. Defaults to Mean Squared Error
-            loss function and ADAM optimizer function.
+            Args:
+                symbol ---- ticker symbol of desired stock
+                data ---- full set of training and testing data (split can be specified) (must be dataframe)
+
+            Kwargs:
+                depth ---- number of computational layers to be added to neural network
+                node_counts ---- list of node counts for specified layers (len(node_counts) must be equal to depth)
+                batch ---- batch size of data
+                test_size ---- proportion of data to be used as validation set
+                loss ---- loss function to be used in training (must be supported by tf.keras)
+                learning_rate ---- learning rate to be used by the optimizer
+                inpath ---- filepath of existing model to be loaded instead of training a new one
+
         """
 
         self.batch = batch
         self.symbol = symbol
 
+        # load model if specified
         if inpath != None:
             self.model = tf.keras.models.load_model(dir)
             return
 
+        # assign optimizer (support for optimizer customization coming)
         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
         data_numpy = data.to_numpy()
         split = int(data_numpy.shape[0]*(1-test_size))
 
-        # store data in numpy format
+        # store data in numpy format given data in dataframe
         self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, 60, 1, 1)
         self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, 60, 1, 1)
 
@@ -53,6 +78,11 @@ class Stocker:
 
     def train(self, EPOCHS, early_stopping, plot):
         """ Trains model in data given during Stocker's init.
+
+            args:
+                EPOCHS ---- max number of epochs to run training on
+                early_stopping ---- flag deciding whether or not to implement early stopping (patience=5)
+                plot ---- flag deciding whether or not to save plots of error
         """
         early = None
         if early_stopping:
@@ -76,7 +106,11 @@ class Stocker:
             print()
 
     def evaluate(self, data=None):
-        """ Evalate model and output loss """
+        """ Evalate model and output loss 
+        
+            args
+                data ---- if specified, use as validation data instead of data stored by Stocker object (must be pd.Dataframe)
+        """
 
         if data != None:
             self.val_in, self.val_out = dh.single_step_data(data, data[:, 4], 0, None, 60, 1, 1)
@@ -85,7 +119,11 @@ class Stocker:
         self.loss = self.model.evaluate(x=self.val_in, y=self.val_out, batch_size=self.batch)
 
     def save_model(self, dir='./models/'):
-        """ Save model to given folder. models folder is default """
+        """ Save model to given folder. models folder is default 
+        
+            args:
+                dir ---- folder where models are to be stored
+        """
 
         if not os.path.exists(dir):
             os.mkdir(dir)
@@ -95,8 +133,13 @@ class Stocker:
         self.model.save(dir)
 
     def predict_data(self, data_in):
-        """ Method predicts 1 step ahead given data 
-            Sample number must be greater than batch size
+        """ Method makes single-step prediction given at least 60 prior data points
+            
+            args:
+                data_in ---- data on which to perform a prediction (numpy array)
+
+            returns:
+                predictions ---- numpy array of predicted values
         """
 
         predictions = self.model.predict(data_in, verbose=1)
