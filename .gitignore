@@ -139,3 +139,6 @@ key.txt
 
 # models
 /models/*.h5
+
+# cache
+/__pycache__/
