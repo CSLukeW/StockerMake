@@ -27,7 +27,7 @@ import helpers as helper
 
 class Stocker:
     def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None):
-        """ Creating Stocker instance immediately creates model 
+        """ Creating Stocker instance and model
 
             Args:
                 symbol ---- ticker symbol of desired stock
@@ -55,6 +55,7 @@ class Stocker:
         # assign optimizer (support for optimizer customization coming)
         optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
+        # swap data to numpy for easier manipulation
         data_numpy = data.to_numpy()
         split = int(data_numpy.shape[0]*(1-test_size))
 
@@ -63,9 +64,9 @@ class Stocker:
         self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, 60, 1, 1)
 
         print('Constructing model...')
-        # create and store model
-        self.model = tf.keras.Sequential()
 
+        self.model = tf.keras.Sequential()
+        # build model based on user inputs
         for i in range(depth):
             self.model.add(tf.keras.layers.LSTM(node_counts[i], activation='tanh', recurrent_activation='sigmoid', \
                                                     input_shape=self.train_in.shape[-2:], return_sequences=True, name='LSTM'+str(i)))
@@ -109,7 +110,8 @@ class Stocker:
         """ Evalate model and output loss 
         
             args
-                data ---- if specified, use as validation data instead of data stored by Stocker object (must be pd.Dataframe)
+                data ---- if specified, use as validation data instead of data stored by Stocker object (must be pd.Dataframe).
+                          Must specify if model was loaded from file.
         """
 
         if data != None:
