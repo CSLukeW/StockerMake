@@ -5,7 +5,7 @@
 Install using [pip](https://pypi.org/project/StockerMake/0.0.1/) installer.
 
 ```bash
-pip install StockerMake
+pip install stockermake
 ```
 
 ## Usage
