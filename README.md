@@ -34,6 +34,8 @@ The StockerMake script combines the Stocker and helper modules into one to creat
 #### Usage Example:
     StockerMake APIKEY FORD MSFT --early_stop --plots
 
+The above command will create, train, and evaluate a model for the FORD ticker. It saves a model FORD.h5 in directory ./models/ and input, loss, and prediction graphs in the directory ./plots/ for analysis.
+
 ### The Stocker Module
 
 If you would like to use your own data pipelines as inputs, the Stocker and data helper modules can be used separately from the main script.
