@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="Stocker",
+    name="StockerMake",
     version="0.0.1",
     author="Luke Williams",
     author_email="williams.luke.2001@gmail.com",

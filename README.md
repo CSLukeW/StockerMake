@@ -5,7 +5,7 @@
 Install using [pip](https://pip.pypa.io/en/stable/) installer.
 
 ```bash
-pip install Stocker
+pip install StockerMake
 ```
 
 ## Usage
