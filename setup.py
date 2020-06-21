@@ -11,7 +11,7 @@ setuptools.setup(
     description="Modular Neural Network Protyping for Stock Market Prediction",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/CSLukeW/Stocker",
+    url="https://github.com/CSLukeW/StockerMake",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
