@@ -1,4 +1,4 @@
-# Stocker: Modular Prototyping Tool for Stock Market Prediction Models
+# StockerMake: Modular Prototyping Tool for Stock Market Prediction Models
 
 ## Installation
 
