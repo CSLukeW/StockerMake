@@ -138,7 +138,7 @@ key.txt
 /plots/
 
 # models
-/models/*.h5
+*.h5
 
 # cache
 /__pycache__/
