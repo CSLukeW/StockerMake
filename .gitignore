@@ -135,10 +135,12 @@ dmypy.json
 key.txt
 
 # plots
-/plots/
+*.png
 
 # models
 *.h5
 
 # cache
 /__pycache__/
+
+*.txt

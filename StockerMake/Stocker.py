@@ -23,7 +23,7 @@ from matplotlib import pyplot
 import os
 from sklearn.preprocessing import MinMaxScaler
 
-import helpers as helper
+from . import helpers as helper
 
 class Stocker:
     def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None):

@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
-import stockermake
+from . import Stocker
+from . import helpers as helper
+import argparse
+from matplotlib as pyplot
+import pandas
+import numpy
 
 parser = argparse.ArgumentParser(description="StockerMake script")
 parser.add_argument('key', help='User API Key')
@@ -35,7 +40,7 @@ for symbol in symbols:
         pyplot.suptitle('Input Features')
         pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/input.png')
 
-    model = Stocker(symbol, hist, parse.depth, parse.node_counts, parse.batch, parse.test_size, parse.loss, \
+    model = Stocker.Stocker(symbol, hist, parse.depth, parse.node_counts, parse.batch, parse.test_size, parse.loss, \
                         parse.learning_rate, parse.model_in)
     model.train(parse.epochs, parse.early_stop, parse.plots)
     model.evaluate()
