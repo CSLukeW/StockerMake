@@ -38,7 +38,7 @@ def daily_adjusted(symbol, key, compact=True):
 
     return data
 
-def single_step_data(data, target, start, end, history_size, target_size, step, normalize=True):
+def single_step_data(data, target, start, end, history_size, target_size, step):
 
     """
     Splits numpy array of data into x and y
@@ -70,10 +70,7 @@ def single_step_data(data, target, start, end, history_size, target_size, step, 
 
         labels.append(target[i+target_size])
 
-    if normalize:
-        return np.array(scaler.fit_transform(dataset)), np.array(labels)
-    else:
-        return np.array(dataset), np.array(labels)
+    return np.array(dataset), np.array(labels)
 
 def make_dir(dir):
     """ make path if does not exist """
