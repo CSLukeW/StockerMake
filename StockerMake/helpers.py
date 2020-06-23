@@ -51,10 +51,7 @@ def single_step_data(data, target, start, end, history_size, target_size, step, 
         target_size ---- future window to predict
         step ---- index increment
     """
-
-    if normalize:
-        scaler = MinMaxScaler()
-        data = scaler.fit_transform(data)
+    scaler = MinMaxScaler()
 
     print(data)
 
@@ -73,7 +70,10 @@ def single_step_data(data, target, start, end, history_size, target_size, step, 
 
         labels.append(target[i+target_size])
 
-    return np.array(dataset), np.array(labels)
+    if normalize:
+        return np.array(scaler.fit_transform(dataset)), np.array(labels)
+    else:
+        return np.array(dataset), np.array(labels)
 
 def make_dir(dir):
     """ make path if does not exist """
