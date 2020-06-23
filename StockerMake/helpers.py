@@ -51,9 +51,7 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
         target_size ---- future window to predict
         step ---- index increment
     """
-
-    #scaler = MinMaxScaler()
-    #data = scaler.fit_transform(data)
+    scaler = MinMaxScaler()
 
     print(data)
 

@@ -26,7 +26,7 @@ from sklearn.preprocessing import MinMaxScaler
 from . import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None):
+    def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None, normalize=True):
         """ Creating Stocker instance and model
 
             Args:
@@ -46,6 +46,7 @@ class Stocker:
 
         self.batch = batch
         self.symbol = symbol
+        self.normalize = normalize
 
         # load model if specified
         if inpath != None:
@@ -62,6 +63,11 @@ class Stocker:
         # store data in numpy format given data in dataframe
         self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, 60, 1, 1)
         self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, 60, 1, 1)
+
+        if normalize:
+            self.scaler = MinMaxScaler()
+            self.train_in = scaler.fit_transform(self.train_in)
+            self.val_in = self.scaler.fit_transform(self.val_in)
 
         print('Constructing model...')
 
@@ -116,7 +122,10 @@ class Stocker:
 
         if data != None:
             self.val_in, self.val_out = dh.single_step_data(data, data[:, 4], 0, None, 60, 1, 1)
-            return
+
+            # normalize if necessary
+            if self.normalize:
+                self.val_in = self.scaler.fit_transform(self.val_in)
 
         self.loss = self.model.evaluate(x=self.val_in, y=self.val_out, batch_size=self.batch)
 
@@ -143,6 +152,10 @@ class Stocker:
             returns:
                 predictions ---- numpy array of predicted values
         """
+
+        # normalize if Stocker is configured to
+        if self.normalize:
+            data_in = self.scaler.fit_transform(data_in)
 
         predictions = self.model.predict(data_in, verbose=1)
 
