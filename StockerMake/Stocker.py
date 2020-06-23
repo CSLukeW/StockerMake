@@ -67,7 +67,7 @@ class Stocker:
         if normalize:
             self.scaler = MinMaxScaler()
             self.train_in = scaler.fit_transform(self.train_in)
-            self.val_in = scaler.fit_transform(self.val_in)
+            self.val_in = self.scaler.fit_transform(self.val_in)
 
         print('Constructing model...')
 
