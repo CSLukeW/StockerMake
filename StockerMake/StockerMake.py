@@ -18,6 +18,7 @@ def main():
     parser.add_argument('-learning_rate', default=.001, type=float, help='Learning rate of Neural Net (Default .001)')
     parser.add_argument('-epochs', default=100, type=int, help='Epoch count for training (Default 100)')
     parser.add_argument('-model_in', default=None, help='Path of pre-made model to load')
+    parser.add_argument('--normalize', action='store_true', help='Normalizes data')
     parser.add_argument('--early_stop', action='store_true', default=False, help='Apply early stopping to model training (Patience 10)')
     parser.add_argument('--plots', action='store_true', help='Saves all plots to plots folder')
     parser.add_argument('symbols', nargs='*', help="List of symbols to train")
@@ -42,7 +43,7 @@ def main():
             pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/input.png')
 
         model = Stocker.Stocker(symbol, hist, parse.depth, parse.node_counts, parse.batch, parse.test_size, parse.loss, \
-                            parse.learning_rate, parse.model_in)
+                            parse.learning_rate, parse.model_in, parse.normalize)
         model.train(parse.epochs, parse.early_stop, parse.plots)
         model.evaluate()
         model.save_model()
