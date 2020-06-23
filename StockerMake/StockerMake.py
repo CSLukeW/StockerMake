@@ -6,6 +6,7 @@ import argparse
 from matplotlib import pyplot
 import pandas
 import numpy
+from sklearn.preprocessing import MinMaxScaler
 
 def main():
     parser = argparse.ArgumentParser(description="StockerMake script")
@@ -47,6 +48,7 @@ def main():
         model.train(parse.epochs, parse.early_stop, parse.plots)
         model.evaluate()
         model.save_model()
+
         predictions = model.predict_data(model.val_in)
 
         standard_numpy = hist[int(hist.shape[0]*(1-parse.test_size)):]['5. adjusted close'].to_numpy()
