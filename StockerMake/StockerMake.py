@@ -60,3 +60,6 @@ def main():
             pyplot.suptitle('Predictions')
             pyplot.legend()
             pyplot.savefig(helper.make_dir('./plots/' + symbol) + '/predictions.png')
+
+if __name__ == '__main__':
+    main()
