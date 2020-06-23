@@ -38,7 +38,7 @@ def daily_adjusted(symbol, key, compact=True):
 
     return data
 
-def single_step_data(data, target, start, end, history_size, target_size, step):
+def single_step_data(data, target, start, end, history_size, target_size, step, normalize=True):
 
     """
     Splits numpy array of data into x and y
@@ -52,8 +52,6 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
         step ---- index increment
     """
     scaler = MinMaxScaler()
-
-    print(data)
 
     dataset=[]
     labels=[]
@@ -69,6 +67,13 @@ def single_step_data(data, target, start, end, history_size, target_size, step):
         dataset.append(data[indices])
 
         labels.append(target[i+target_size])
+
+    # normalize data if necessary
+    if normalize:
+        count=0
+        for data in dataset:
+            data = scaler.fit_transform(data, y=labels[count])
+            count += 1
 
     return np.array(dataset), np.array(labels)
 
