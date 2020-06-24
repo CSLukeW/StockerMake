@@ -20,16 +20,17 @@ The StockerMake script combines the Stocker and helper modules into one to creat
         symbols ---- Ticker symbols to create models for
 
     Optional:
-        depth ---- number of layers to include in the neural network (def: 1)
-        node_counts ---- list of node counts for layers (len(node_counts) must equal depth)
-        batch ---- batch size of input data set (def: [100])
-        test_size ---- proportion of dataset to use as validation (def: .2)
-        loss ---- identifier string of keras-supported loss function to be used in training (def: mse)
-        learning_rate ---- learning rate to be used by the Adam optimizer
-        epochs ---- maximum number of epochs to train the model (def: 100)
-        model_in ---- file path of pre-made model to load
-        early_stop ---- flag deciding whether to apply early stopping (patience 5) to the training phase
-        plots ---- flag deciding whether to save loss, input, and prediction graphs
+        -depth ---- number of layers to include in the neural network (def: 1)
+        -node_counts ---- list of node counts for layers (len(node_counts) must equal depth)
+        -batch ---- batch size of input data set (def: [100])
+        -test_size ---- proportion of dataset to use as validation (def: .2)
+        -loss ---- identifier string of keras-supported loss function to be used in training (def: mse)
+        -learning_rate ---- learning rate to be used by the Adam optimizer
+        -epochs ---- maximum number of epochs to train the model (def: 100)
+        -model_in ---- file path of pre-made model to load
+        --early_stop ---- flag deciding whether to apply early stopping (patience 5) to the training phase
+        --plots ---- flag deciding whether to save loss, input, and prediction graphs
+        --normalize ---- flag deciding whether or not to normalize input data
 
 #### Usage Example:
     StockerMake APIKEY FORD MSFT --early_stop --plots
