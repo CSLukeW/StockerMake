@@ -10,6 +10,8 @@ pip install stockermake
 
 ## Usage
 
+### [Video Overview](https://www.youtube.com/watch?v=wJASzHNqNXE&t)
+
 ### The StockerMake Script
 
 The StockerMake script combines the Stocker and helper modules into one to create an easy, convenient, and modular neural network prototyping tool designed for stock market prediction. The script will take the user's desired parameters and create, train, and evaluate a model fitting said parameters. This allows the user to quickly analyze model prototypes, make adjustments, and iterate on model designs.
