@@ -78,7 +78,7 @@ Stocker:
 
 Helpers:
 - Data for multi-step prediction
-- Data normalization option
+- ~~Data normalization option~~
 - Compact (last 60) data
 
 ## Contributions
