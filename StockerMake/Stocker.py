@@ -26,7 +26,7 @@ from sklearn.preprocessing import MinMaxScaler
 from . import helpers as helper
 
 class Stocker:
-    def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None, normalize=True):
+    def __init__(self, symbol, data, depth=1, node_counts=[100], batch=50, test_size=.2, loss='mse', learning_rate=.001, inpath=None, normalize=True, past_window=60):
         """ Creating Stocker instance and model
 
             Args:
@@ -61,8 +61,8 @@ class Stocker:
         split = int(data_numpy.shape[0]*(1-test_size))
 
         # store data in numpy format given data in dataframe
-        self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, 60, 1, 1, self.normalize)
-        self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, 60, 1, 1, self.normalize)
+        self.train_in, self.train_out = helper.single_step_data(data_numpy, data_numpy[:, 4], 0, split, past_window, 1, 1, self.normalize)
+        self.val_in, self.val_out = helper.single_step_data(data_numpy, data_numpy[:, 4], split, None, past_window, 1, 1, self.normalize)
 
         print('Constructing model...')
 
