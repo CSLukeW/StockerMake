@@ -74,7 +74,7 @@ Stocker:
 - Support for more layer types
 - Multi-step future models
 - Optimizer customization
-- Customizable past-window (how far back to consider)
+- ~~Customizable past-window (how far back to consider)~~
 
 Helpers:
 - Data for multi-step prediction
