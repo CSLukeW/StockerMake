@@ -72,7 +72,7 @@ setuptools.setup(
         'termcolor==1.1.0',
         'threadpoolctl==2.1.0',
         'typing-extensions==3.7.4.2',
-        'urllib3==1.25.9',
+        'urllib3==1.26.5',
         'Werkzeug==1.0.1',
         'wrapt==1.12.1',
         'yarl==1.4.2',
