@@ -27,7 +27,7 @@ setuptools.setup(
     },
     install_requires=[
         'absl-py==0.9.0',
-        'aiohttp==3.6.2',
+        'aiohttp==3.7.4',
         'alpha-vantage==2.2.0',
         'astunparse==1.6.3',
         'async-timeout==3.0.1',
