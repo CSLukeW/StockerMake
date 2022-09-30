@@ -44,7 +44,7 @@ setuptools.setup(
         'idna==2.9',
         'idna-ssl==1.1.0',
         'importlib-metadata==1.6.1',
-        'joblib==0.15.1',
+        'joblib==1.2.0',
         'Keras-Preprocessing==1.1.2',
         'Markdown==3.2.2',
         'matplotlib==3.2.2',
