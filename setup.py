@@ -33,7 +33,7 @@ setuptools.setup(
         'async-timeout==3.0.1',
         'attrs==19.3.0',
         'cachetools==4.1.0',
-        'certifi==2020.6.20',
+        'certifi==2022.12.7',
         'chardet==3.0.4',
         'gast==0.3.3',
         'google-auth==1.18.0',
