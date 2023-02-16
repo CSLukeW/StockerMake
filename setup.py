@@ -73,7 +73,7 @@ setuptools.setup(
         'threadpoolctl==2.1.0',
         'typing-extensions==3.7.4.2',
         'urllib3==1.26.5',
-        'Werkzeug==1.0.1',
+        'Werkzeug==2.2.3',
         'wrapt==1.12.1',
         'yarl==1.4.2',
         'zipp==3.1.0',
